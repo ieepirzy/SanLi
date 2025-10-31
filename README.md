@@ -13,7 +13,7 @@ The workflow for running SanLi will look like the following:
 
 SanLi -> AST -> LLVM IR -> LLVM compiler generates machine code -> CPU runs the code.
 
-As such, this project mainly consists of creating the AST.
+As such, this project mainly consists of creating the LLVM IR compatible AST.
 
 The intermediary language chosen for the AST is Python due to the existing llvmlite package and the ease of prototyping which Python brings.
 
