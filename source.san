@@ -1,0 +1,14 @@
+let x: int = 2+3;
+let r: int = 5+7;
+
+
+let k: char = k;
+
+while x:
+    str = str+k;
+    x = x+1;
+
+
+
+
+
