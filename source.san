@@ -1,12 +1,10 @@
-let x: int = 2+3;
-let r: int = 5+7;
+var x = 2+3: int;
+
+let t = 23+"5": Obj;
+
+const stringyThing = "igloo": str;
 
 
-let k: char = k;
-
-while x:
-    str = str+k;
-    x = x+1;
 
 
 
