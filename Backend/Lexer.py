@@ -57,7 +57,7 @@ class Lexer:
                     
                 tokens.append(("NUM", value))
 
-            elif ch in "*<>+-/=;:":  # Operator
+            elif ch in "*<>+-/=;:!?)(":  # Operator
                 operator = ch
                 allowed_compounds = {"++", "--", "==", "!=", "+=", "-=", "*=", "/=", "<=", ">="}
 
@@ -67,6 +67,7 @@ class Lexer:
 
                 # After this, operator is either single-char or valid compound
                 tokens.append(("SYM", operator))
+
 
             else:
                 raise ValueError(f"Unexpected character: {ch}")
