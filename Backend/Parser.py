@@ -11,6 +11,24 @@ Once the tree is built, LLVM IR generation just walks the tree, emitting instruc
 
 class Parser:
 
+    LLVM_TYPE_MAP = {
+        "int": "i32", 
+        "Bool": "i1",
+        "bool": "i1",
+        "str": "i8*",   # pointer to chars
+        "Obj": "i8*",   # generic object pointer, can refine later
+        "null": "i8*"   # null pointer
+    }
+
+    #for expression parsing
+    PRECEDENCE = {
+        '+': 1,
+        '-': 1,
+        '*': 2,
+        '/': 2,
+    }
+
+
     def __init__(self, tokens):
         self.tokens = tokens
         self.pos = 0
@@ -58,19 +76,32 @@ class Parser:
             raise SyntaxError(f"Unexpected token in expression: {token}")        
 
     def parseVarDec(self):
-        #to parse a variable declaration, we need to generate a base node with the children of the declaration. 
-
-        kw = self.getToken() #this stores the keyword and also advances the tokens list, i.e consumes the token
+        
+        #Get/consume tokens
+        kw_token = self.getToken()  # 'var', 'let', or 'const'
         name_token = self.expect("IDENT")
-    
-
-    #for expression parsing
-    PRECEDENCE = {
-        '+': 1,
-        '-': 1,
-        '*': 2,
-        '/': 2,
-    }
+        self.expect("SYM", "=")
+        
+        #Parse the expression assigned to the variable
+        expr = self.parseExprs()
+        self.expect("SYM", ":")
+        
+        # Consume the type identifier and map to LLVM type
+        type_token = self.expect("IDENT")
+        llvm_type = self.LLVM_TYPE_MAP.get(type_token[1])
+        if llvm_type is None:
+            raise SyntaxError(f"Unknown type: {type_token[1]}")
+        
+        #Consume the terminating semicolon
+        self.expect("SYM", ";")
+        
+        #Return a VarDeclNode with LLVM-compatible info
+        return ast.VarDeclNode(
+            name=name_token[1],
+            value=expr,
+            typ=llvm_type,
+            kind=kw_token[1]  # 'var' or 'const'
+        )
 
     def parseExprs(self, min_prededence=0):
         left = self.parseFactor()
@@ -87,7 +118,23 @@ class Parser:
             return self.tokens[self.pos]
         return None
     
-    
+    def expect(self, token_type, token_value=None):
+        """
+        Consume the next token and assert its type and optionally its value.
+        Raises SyntaxError if the token doesn't match expectations.
+        """
+        token = self.getToken()  # consume the next token
+        if token is None:
+            raise SyntaxError(f"Unexpected end of input, expected {token_type} {token_value}")
+        
+        if token[0] != token_type:
+            raise SyntaxError(f"Unexpected token {token}, expected type {token_type}")
+        
+        if token_value is not None and token[1] != token_value:
+            raise SyntaxError(f"Unexpected token {token}, expected value '{token_value}'")
+        
+        return token
+
     def parseIf(self):
         raise NotImplemented
 
