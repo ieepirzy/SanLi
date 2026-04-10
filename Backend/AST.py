@@ -40,3 +40,14 @@ class BoolNode(AstNode):
 class IdentifierNode(AstNode):
     def __init__(self, name):
         self.name = name
+
+# Control flow nodes need structure like: KWRD (condition (like binaryExprNode)) {body}
+class IfNode(AstNode):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body  # list of statements
+
+class WhileNode(AstNode):
+    def __init__(self, condition, body):
+        self.condition = condition
+        self.body = body

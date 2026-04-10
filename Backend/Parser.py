@@ -26,6 +26,13 @@ class Parser:
         '-': 1,
         '*': 2,
         '/': 2,
+        '%': 2,
+        '>': 0,   # comparison operators
+        '<': 0,
+        '==': 0,
+        '!=': 0,
+        '>=': 0,
+        '<=': 0,
     }
 
 
@@ -46,7 +53,7 @@ class Parser:
         token = self.peekToken()
         if token[0] == "KWRD" and token[1] in ("var","const","let"):
             if token[1] == "let":
-                raise NotImplementedError
+                return self.parseVarDec()
             return self.parseVarDec()
         
         elif token[0] == "KWRD" and token[1] == "if":
@@ -102,11 +109,60 @@ class Parser:
             typ=llvm_type,
             kind=kw_token[1]  # 'var' or 'const'
         )
-
-    def parseExprs(self, min_prededence=0):
+    # Parse full expression
+    def parseExprs(self, min_precedence=0):
+        # find tree left side node
         left = self.parseFactor()
-
+        while True:
+        # find if next token is operator
+            token = self.peekToken()
+            if token is None or token[0] != "SYM":
+                break   
+            prec = self.PRECEDENCE.get(token[1])
+            if prec is None or prec < min_precedence:
+                break
+            op = self.getToken()
+            right = self.parseExprs(min_precedence=prec+1)
+            left = ast.binaryExprNode(left,op[1],right)
+        return left
     
+    def parseBlock(self):
+        self.expect('SYM','{')
+        statements = []
+        while True:
+            token = self.peekToken()
+
+            if token is None:
+                raise SyntaxError("Unclosed block: expected '}' ")
+            if token[0] == 'SYM' and token[1] == '}':
+                break
+
+            statements.append(self.parseStatement())
+        self.expect('SYM','}')
+        return statements
+
+    def parseIf(self):
+        self.getToken()
+
+        self.expect('SYM','(')
+        condition = self.parseExprs()
+        self.expect('SYM',')')
+
+        body = self.parseBlock()
+
+        return ast.IfNode(condition,body)
+    
+    def parseWhile(self):
+        self.getToken()
+
+        self.expect('SYM','(')
+        condition = self.parseExprs()
+        self.expect('SYM',')')
+
+        body = self.parseBlock()
+
+        return ast.WhileNode(condition,body)
+
     def getToken(self):
         token = self.peekToken()
         if token:
@@ -135,10 +191,6 @@ class Parser:
         
         return token
 
-    def parseIf(self):
-        raise NotImplemented
-
-    def parseWhile(self):
-        raise NotImplemented
+    
 
     

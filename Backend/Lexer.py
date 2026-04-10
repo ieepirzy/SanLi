@@ -57,7 +57,7 @@ class Lexer:
                     
                 tokens.append(("NUM", value))
 
-            elif ch in "*<>+-/=;:!?)(":  # Operator
+            elif ch in "*<>+-/=;:!?)({}|&@#%":  # Operator and symbols
                 operator = ch
                 allowed_compounds = {"++", "--", "==", "!=", "+=", "-=", "*=", "/=", "<=", ">="}
 
@@ -79,3 +79,4 @@ class Lexer:
             return None
         return self.source[self.position]
     
+

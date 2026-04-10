@@ -4,8 +4,9 @@ let t = 23+"5": Obj;
 
 const stringyThing = "igloo": str;
 
-
-
+if (x) {
+    var y = 1: int;
+}
 
 
 
